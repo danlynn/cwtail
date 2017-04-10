@@ -29,6 +29,18 @@ The -l option will list all existing log groups. Assuming you have a Lambda func
 
 The command will show the last 30 log records and then wait for more to appear. If you invoke your Lambda function again, you should see more output within ~10 seconds.
 
+## Usage via Docker
+
+Note that if your node environment is dockerized then you can hit a 'Q' to exit follow mode in addition to ctrl-C.  This is because signal handling in Docker containers for commands like `tail -f some.log` can fail to terminate upon ctrl-C.  Thus, hitting a 'Q' will also terminate when using the follow option `cwtail -f /aws/lambda/MyFunction`.
+
+For example, if you have docker installed, the following can only be terminated by hitting the 'Q' key:
+
+```bash
+$ docker run --rm -ti -v "$(pwd):/myapp" -v "$(pwd)/.aws:/root/.aws" danlynn/claudia:2.9.0 cwtail -tf "/aws/lambda/hello-world"
+```
+
+...provided that the current working directory has the appropriate `.aws` config sub-directory setup.
+
 ## Advanced options
 
 By default, cwtail outputs only the plain log messages in chronological order. You can use some additional options to show extra information.
