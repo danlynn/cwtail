@@ -143,20 +143,15 @@ function tail(logs, logGroup, numRecords, showTimes, showStreams, seenStreamTime
 }
 
 /**
- * This supports exiting the 'follow' mode via either ctrl-c OR
- * hitting the 'Q' key.  The 'Q' is very helpful when running
- * within a docker container since many docker base images do not
- * have support for the `docker run --init` option.  Many commands
- * when ran in docker container like `tail -f` fail to terminate
- * on ctrl-c without this option.  Thus, we've added this option
- * to handle non --init supporting docker base images.  Note that
- * ctrl-c will still terminate if this command is launched from
- * bash inside or outside of a docker container.  This handles 
- * cases like:
+ * This supports exiting the 'follow' mode via ctrl-c.  Many 
+ * commands when ran in docker container like `tail -f` fail to 
+ * terminate on ctrl-c without specifically listening for it.  
+ * Thus, we've added this option to handle non `docker run --init` 
+ * supporting docker base images.  This handles cases like:
  * 
  *   $ docker run --rm -it image:latest cwtail -tf /aws/lambda/hello-world
  */
-function quiteOnQ() {
+function quitOnCtrlC() {
   var stdin = process.stdin;
 
   // without this, we would only get streams once enter is pressed
@@ -171,8 +166,7 @@ function quiteOnQ() {
 
   // on any data into stdin
   stdin.on('data', function(key){
-    // ctrl-c ( end of text )
-    if (key === '\u0003' || key === 'q' || key === 'Q') {
+    if (key === '\u0003') { // ctrl-c ( end of text )
       process.exit();
     }
     // write the key to stdout all normal like
@@ -236,8 +230,7 @@ function main(argv) {
     if (arg.options.list) {
       return list(logs);
     } else if (arg.options.follow) {
-      quiteOnQ();
-      console.log("\x1b[7m Press Q to quit \x1b[0m"); // note when ran in docker, ctrl-c is swallowed
+      quitOnCtrlC();
       var seenStreamTimestamps = {};
       function readNext() {
         return tail(logs, arg.argv[0], opt.num || DEFAULT_NUM_RECORDS, arg.options.time, arg.options.streams, seenStreamTimestamps, arg.options.eol)
