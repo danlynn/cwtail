@@ -56,7 +56,7 @@ function getStreamEvents(logs, logGroup, logStream) {
 function tail(logs, logGroup, numRecords, showTimes, showStreams, seenStreamTimestamps, eol) {
   return logs.describeLogStreamsAsync({
     logGroupName: logGroup,
-    descending: true,
+    descending: false, // can't think of situation where descending sort is desirable
     limit: 10,
     orderBy: 'LastEventTime'
   })
