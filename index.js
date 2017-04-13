@@ -94,7 +94,7 @@ function tail(logs, logGroup, numRecords, showTimes, showStreams, seenStreamTime
         allRecords = allRecords.concat(records);
         //console.log('', records.length, 'record(s)');
         numRead += records.length;
-        if (numRead < numRecords) {
+        if (numRead < numRecords || numRecords == 0) { // 0 means follow mode - thus, follow until terminated
           // Keep reading more
           return readMore();
         } else {
@@ -233,7 +233,7 @@ function main(argv) {
       quitOnCtrlC();
       var seenStreamTimestamps = {};
       function readNext() {
-        return tail(logs, arg.argv[0], opt.num || DEFAULT_NUM_RECORDS, arg.options.time, arg.options.streams, seenStreamTimestamps, arg.options.eol)
+        return tail(logs, arg.argv[0], 0, arg.options.time, arg.options.streams, seenStreamTimestamps, arg.options.eol)
         .then(function () {
           return new Promise(function (resolve, reject) { setTimeout(resolve, FOLLOW_INTERVAL)});
         })
@@ -244,7 +244,7 @@ function main(argv) {
       return readNext();
     } else {
       var seenStreamTimestamps = {};
-      return tail(logs, arg.argv[0], opt.num || DEFAULT_NUM_RECORDS, arg.options.time, arg.options.streams, seenStreamTimestamps, arg.options.eol);
+      return tail(logs, arg.argv[0], arg.options.num || DEFAULT_NUM_RECORDS, arg.options.time, arg.options.streams, seenStreamTimestamps, arg.options.eol);
     }
   })
   .then(function () {
